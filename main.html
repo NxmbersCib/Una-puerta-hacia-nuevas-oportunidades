@@ -5,56 +5,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="main_style.css">
+    <link rel="stylesheet" type="text/css" href="swiper-bundle.min.css">
+    <link rel="stylesheet" type="text/css" href="swiper-bundle.min.js.map">
+    <link rel="stylesheet" type="text/css" href="swiper.min.css">
 </head>
 
 <body>
+
+    <script src="swiper-bundle.min.js"></script>
+
     <div class="topbar">
-        <img class="insmar_escudo" src="src/insmar_escudo.png">
-        <h2 class="nombre_tesis">
-            Una Puerta Hacia<br>Nuevas Oportunidades
-        </h2>
+        <div class="left-content">
+            <img class="insmar_escudo" src="src/insmar_escudo.png">
+            <h2 class="nombre_tesis">
+                Una Puerta Hacia<br>Nuevas Oportunidades
+            </h2>
+        </div>
+        <ul class="navega">
+            <li> <span class="navega_inicio">Inicio</span></li>
+            <li>Objetivos</li>
+            <li>Resultados</li>
+            <li>No se que poner</li>
+        </ul>
     </div>
+    <!-- Swiper -->
+    <div class="swiper mySwiper">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide"><img src="src/juego_castillo.png"></div>
+          <div class="swiper-slide"><img src="src/juego_adrian.png"></div>
+          <div class="swiper-slide"><img src="src/juego_matias.jpeg"></div>
+        </div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+      </div>
+  
+      <!-- Swiper JS -->
+      <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  
+      <!-- Initialize Swiper -->
+      <script>
+        var swiper = new Swiper(".mySwiper", {
+          navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+          },
+        });
+      </script>
+    
+    
+
     <div class="descripcion">
-        <h2 class="desc_titulo">¿Quiénes somos?</h2>
-        <p class="desc_texto">Lorem ipsum </p>
+        <h2 class="desc_titulo">¿Que se supone</h2>
+        <p class="desc_texto">que ponga alli arriba?</p>
     </div>
-    <style type="text/css">
-        body {
-            margin: 0;
-        }
 
-        .topbar {
-            width: 100%;
-            height: 125px;
-            background: #1f1f1f;
-            margin: 0;
-            display: flex;
-            /* Usa flexbox para alinear elementos */
-            align-items: center;
-            /* Centra verticalmente los elementos */
-        }
-
-        .insmar_escudo {
-            margin: 15%;
-            /* Ajusta el margen según tus preferencias */
-            width: 75px;
-            height: 75px;
-        }
-
-        .nombre_tesis {
-            color: gainsboro;
-            font-size: x-large;
-            margin: -14%;
-            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-        }
-
-        .descripcion {
-            display: grid;
-            place-items: center;
-            margin: auto
-        }
-
-    </style>
+    <script src="src/scripts/main.js"></script>
 </body>
 
 </html>
