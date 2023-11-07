@@ -1,4 +1,4 @@
-body {
+/* body {
     margin: 0;
 }
 
@@ -12,7 +12,6 @@ body {
     align-items: center;
     transition: transform 0.2s; 
     z-index: 100;
-    /* padding: 0 20px; */
 }
 
 .left-content {
@@ -37,7 +36,6 @@ body {
 .navega {
     list-style: none;
     padding: 0;
-    /* margin-left: 20%; */
     display: flex;
 }
 
@@ -51,9 +49,17 @@ body {
     color: cornflowerblue
 }
 
-.navega li:hover {
+.navega li a:hover {
     color: cornflowerblue
 }
+
+.navega li a:active {
+    color: cornflowerblue
+}
+
+.navega li a {
+    color: aliceblue
+} */
 
 .descripcion {
     display: grid;
