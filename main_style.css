@@ -71,10 +71,14 @@
     width: 50%;
     margin-left: 25%;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    border-top-left-radius: 10px; /* Radio para la esquina superior izquierda */
-    border-top-right-radius: 10px; /* Radio para la esquina superior derecha */
-    border-bottom-left-radius: 10px; /* Radio para la esquina inferior izquierda */
-    border-bottom-right-radius: 10px; /* Radio para la esquina inferior derecha */
+    border-top-left-radius: 10px;
+    /* Radio para la esquina superior izquierda */
+    border-top-right-radius: 10px;
+    /* Radio para la esquina superior derecha */
+    border-bottom-left-radius: 10px;
+    /* Radio para la esquina inferior izquierda */
+    border-bottom-right-radius: 10px;
+    /* Radio para la esquina inferior derecha */
 }
 
 .desc_texto {
@@ -82,6 +86,12 @@
     place-items: center;
     text-align: center;
     text-justify: distribute;
+}
+
+.desc_imagen {
+    display: grid;
+    place-items: center;
+    text-align: center;
 }
 
 .swiper {
