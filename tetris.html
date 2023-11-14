@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris por Adrian Carvajal</title>
+</head>
+
+<body>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet" />
+    <a href="./resultados.html" class="backbutton">&#8249; volver</a>
+
+    <style>
+        a {
+            text-decoration: none;
+            display: inline-block;
+            padding: 16px 32px;
+            color: #ddd;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            font-size: xx-large;
+            margin-top: 50px;
+            margin-left: 50px;
+            width: 200;
+            height: 200;
+            position: absolute;
+        }
+
+        a:hover {
+            background-color: #ddd;
+            color: #1f1f1f
+        }
+
+        .backbutton {
+            background: #1f1f1f;
+        }
+
+        .backbutton {
+            border-radius: 5%;
+        }
+    </style>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Press Start 2P";
+            /* display: flex; */
+        }
+
+        .info {
+            max-width: 220px;
+            display: grid;
+        }
+
+        #main {
+            border: 2px solid;
+            border-radius: 9px;
+        }
+
+        .chimbolin {
+            display: grid;
+            place-items: center;
+            text-align: center;
+            text-justify: distribute;
+            /* background-color: rgba(255, 255, 255, 0.8); */
+        }
+    </style>
+    <div class="descripcion" style="display: grid;
+    place-items: center;
+    text-align: center;
+    text-justify: distribute;" width="2">
+        <div class="info">
+            <h2>Tetris por Adrian Carvajal</h2>
+            <p>Siguiente pieza:</p>
+            <canvas id="next"></canvas>
+        </div>
+        <canvas id="main"></canvas>
+    </div>
+    <script>
+        const mainCanvas = document.querySelector("#main");
+        const nextCanvas = document.querySelector("#next");
+        const info = document.querySelector(".info");
+        const mainCTX = mainCanvas.getContext("2d");
+        const nextCtx = nextCanvas.getContext("2d");
+
+        mainCTX.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
+
+        const COLS = 10;
+        const ROWS = 20;
+        const BLOCK_SIZE = 30;
+        const COLORS = [
+            "#323232",
+            "red",
+            "blue",
+            "yellow",
+            "orange",
+            "green",
+            "cyan",
+            "pink",
+            "white"
+        ];
+        const LEVELS = {
+            0: 800,
+            1: 720,
+            2: 630,
+            3: 550,
+            4: 470,
+            5: 380
+        };
+        const time = { start: performance.now(), elapsed: 0, level: LEVELS[0] };
+        let animationFrame;
+
+        class Piece {
+            constructor(x) {
+                this.x = x;
+                this.y = 0;
+                this.shape = getShape();
+            }
+
+            draw(ctx) {
+                this.shape.forEach((row, y) => {
+                    row.forEach((num, x) => {
+                        if (num < 1) return;
+                        ctx.fillStyle = COLORS[num];
+                        ctx.fillRect(
+                            (this.x + x) * BLOCK_SIZE,
+                            (this.y + y) * BLOCK_SIZE,
+                            BLOCK_SIZE,
+                            BLOCK_SIZE
+                        );
+                        ctx.strokeRect(
+                            (this.x + x) * BLOCK_SIZE,
+                            (this.y + y) * BLOCK_SIZE,
+                            BLOCK_SIZE,
+                            BLOCK_SIZE
+                        );
+                    });
+                });
+            }
+        }
+        class Board {
+            constructor(ctx, nextCTX) {
+                this.ctx = ctx;
+                this.nextCTX = nextCTX;
+                this.color = COLORS[0];
+                this.init();
+                this.gameOver = false;
+            }
+
+            init() {
+                this.grid = Array.from({ length: ROWS }, () =>
+                    Array.from({ length: COLS }, () => 0)
+                );
+                this.ctx.canvas.width = COLS * BLOCK_SIZE;
+                this.ctx.canvas.height = ROWS * BLOCK_SIZE;
+                this.piece = new Piece(3);
+                this.next = getShape();
+                this.draw();
+            }
+
+            draw() {
+                const p = moves["ArrowDown"](this.piece);
+                const isValid = this.isValid(p);
+                if (!isValid) {
+                    this.freeze(this.piece);
+                    this.piece.shape = this.next;
+                    this.piece.y = 0;
+                    this.piece.x = 3;
+                    this.next = getShape();
+                } else {
+                    this.piece.y = p.y;
+                }
+                this.removeLines();
+                if (this.grid[0].some((num) => num !== 0)) {
+                    console.log("Game over");
+                    this.gameOver = true;
+                    return;
+                }
+                this.drawNext(this.next);
+                this.drawBoard();
+                this.piece.draw(this.ctx);
+            }
+
+            removeLines() {
+                let lines = 0;
+                let remove = false;
+                this.grid.forEach((row, y) => {
+                    if (row.every((num, x) => num > 0)) {
+                        lines++;
+                        this.grid[y].forEach((num, x) => {
+                            if (this.grid[y][x] === 8) {
+                                remove = true;
+                            }
+                            this.grid[y][x] = 8;
+                        });
+                        if (remove) {
+                            this.grid.splice(y, 1);
+                            this.grid.unshift(Array(COLS).fill(0));
+                        }
+                    }
+                });
+            }
+
+            freeze(piece) {
+                piece.shape.forEach((row, y) => {
+                    row.forEach((num, x) => {
+                        if (num > 0) {
+                            this.grid[piece.y + y][piece.x + x] = num;
+                        }
+                    });
+                });
+            }
+
+            isValid(p) {
+                return p.shape.every((row, dy) =>
+                    row.every((num, dx) => {
+                        const x = p.x + dx;
+                        const y = p.y + dy;
+                        return (
+                            num === 0 || (this.isUnderAvailable(x, y) && this.isInside(x, y))
+                        );
+                    })
+                );
+            }
+
+            repeat(shape, cb) {
+                shape.forEach((row, y) => {
+                    row.forEach((num, x) => {
+                        cb(x, y, num, row);
+                    });
+                });
+            }
+
+            isUnderAvailable(x, y) {
+                return this.grid[y] && this.grid[y][x] === 0;
+            }
+
+            isInside(x, y) {
+                return x >= 0 && x < COLS && y <= ROWS;
+            }
+
+            drawNext(next) {
+                this.nextCTX.clearRect(0, 0, BLOCK_SIZE * 5, BLOCK_SIZE * 5);
+                next.forEach((row, y) => {
+                    row.forEach((num, x) => {
+                        if (num < 1) return;
+                        this.nextCTX.fillStyle = COLORS[num];
+                        this.nextCTX.fillRect(
+                            (x + 1) * BLOCK_SIZE,
+                            y * BLOCK_SIZE,
+                            1 * BLOCK_SIZE,
+                            1 * BLOCK_SIZE
+                        );
+                    });
+                });
+            }
+
+            drawBoard() {
+                this.grid.forEach((row, y) => {
+                    row.forEach((num, x) => {
+                        this.ctx.fillStyle = COLORS[num];
+                        this.ctx.lineWidth = 4;
+                        this.ctx.strokeStyle = "#222";
+                        this.ctx.fillRect(
+                            x * BLOCK_SIZE,
+                            y * BLOCK_SIZE,
+                            BLOCK_SIZE,
+                            BLOCK_SIZE
+                        );
+                        this.ctx.strokeRect(
+                            x * BLOCK_SIZE,
+                            y * BLOCK_SIZE,
+                            BLOCK_SIZE,
+                            BLOCK_SIZE
+                        );
+                    });
+                });
+            }
+        }
+
+        const moves = {
+            ArrowLeft: (p) => ({ ...p, x: p.x - 1 }),
+            ArrowRight: (p) => ({ ...p, x: p.x + 1 }),
+            ArrowDown: (p) => ({ ...p, y: p.y + 1 }),
+            ArrowUp: (p) => {
+                const piece = JSON.parse(JSON.stringify(p));
+                for (let y = 0; y < piece.shape.length; y++) {
+                    for (let x = 0; x < y; x++) {
+                        [piece.shape[x][y], piece.shape[y][x]] = [
+                            piece.shape[y][x],
+                            piece.shape[x][y]
+                        ];
+                    }
+                }
+                piece.shape.forEach((row) => row.reverse());
+                return piece;
+            }
+        };
+
+        function getShape() {
+            const shapes = [
+                [
+                    [1, 1, 1, 1],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0]
+                ],
+                [
+                    [2, 2, 0],
+                    [0, 2, 2],
+                    [0, 0, 0]
+                ],
+                [
+                    [0, 3, 3],
+                    [3, 3, 0],
+                    [0, 0, 0]
+                ],
+                [
+                    [4, 4],
+                    [4, 4]
+                ],
+                [
+                    [0, 0, 5],
+                    [5, 5, 5],
+                    [0, 0, 0]
+                ],
+                [
+                    [6, 0, 0],
+                    [6, 6, 6],
+                    [0, 0, 0]
+                ],
+                [
+                    [7, 7, 7],
+                    [0, 7, 0],
+                    [0, 0, 0]
+                ]
+            ];
+            return shapes[Math.floor(Math.random() * shapes.length)];
+        }
+
+        const board = new Board(mainCTX, nextCtx);
+
+        const animate = (now = 0) => {
+            time.elapsed = now - time.start;
+            if (time.elapsed > time.level) {
+                time.start = now;
+                board.draw();
+                if (board.gameOver) {
+                    return cancelAnimationFrame(animationFrame);
+                }
+            }
+            animationFrame = requestAnimationFrame(animate);
+        };
+
+        animate();
+
+        addEventListener("keydown", (event) => {
+            const getNextState = moves[event.key];
+            if (!getNextState) return;
+            const p = getNextState(board.piece);
+            if (board.isValid(p)) {
+                board.piece.shape = p.shape;
+                board.piece.x = p.x;
+                board.piece.y = p.y;
+                board.drawBoard();
+                board.piece.draw(board.ctx);
+            }
+        });
+    </script>
+
+    <style>
+        body {
+            background-image: url('src/background.png');
+            background-size: cover;
+            background-repeat: repeat
+        }
+    </style>
+
+</body>
+
+</html>
